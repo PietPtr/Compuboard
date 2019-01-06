@@ -1,0 +1,154 @@
+# README #
+
+## psftools ##
+
+a simple suite of utilities to provide text based editing of psf files.
+
+Author: Gunnar Zötl <gz@tset.de>, 2016-2017.   
+Released under the terms of the MIT/X11 license. See file LICENSE for details.
+
+## About ##
+
+This is a suite of utilities intended to create psf font files. The main use
+is to automatically create font files from pixel data converted into a simple
+text file format, but it can also be used to create fonts manually. It is
+inspired by nafe (http://nafe.sourceforge.net/), but is much more complete.
+It supports both psf1 and psf2 file formats, and unicode sequences. The main
+tools are psfd, which converts a psf format font file into a text format,
+which can then be edited in any text editor, and psfc, which takes a text file
+in a special format and converts that into a psf (1 or 2) format font file.
+There is also psfid, which can be used to query some information from a psf
+font file, and psft, which helps with editing fonts.
+
+## Building & Installing ##
+
+A simple `make` should build the three tools. Use `make install` to copy the
+tools to /usr/local/bin or `make install BINDIR=/my/bin/dir` to use a custom
+install location.
+
+## File format ##
+
+The text file format is a textual representation of the psf[1,2] font file
+format, as presented here: http://www.win.tue.nl/~aeb/linux/kbd/font-formats-1.html
+
+Lines starting with a hash char (#) are comments. Header fields and glyph
+header lines may also have trailing comments, but lines that are part of a
+glyphs bitmap data may not. Within comments, all chars are allowed, but
+everywhere else, only ASCII chars are permissible.
+
+You an also have empty lines anywhere except between a glyph header and the
+end of the glyph bitmap data, where it will be interpreted as an all-zero
+row of pixels.
+
+The first non-comment non-whitespace line must be
+
+    @psf<version>
+
+where version is 1 or 2
+
+Then follows the header, one field per line. Recognized header fields are:
+
+`Width: <number>`
+:	width of char in pixels. For psf1 fonts this is optional, but must be
+	set to 8 if specified. For psf2 files, whis need not be a multiple of 8.
+
+`Height: <number>`
+:	height of char in pixels.
+
+`Pixel: <char>`
+:	specification of ASCII char to be used for a set pixel (1 bit). Every
+	other char within a glyph definition is treated as a 0 bit. Default is '#'
+
+After the header follow the glyphs. Each glyph starts with a single line
+glyph header:
+
+    @<n> [: <unicode vals>]
+
+n is the sequence number of the following glyph, starting from 0. You may
+skip glyph numbers, if you do so, the place will be filled with an empty
+glyph (a.k.a space) with empty unicode translation data. Unicode vals are
+optional entries U+XXXX where XXXX is a 4 digit hex number for psf1 or more
+digits for psf2. A comma starts a sequence, that is, multiple values that
+when combined will result in this glyph. The full grammar for the unicode
+vals is similar to how it is stored in the psf file:
+
+    <unicode vals> := <uc>*<seq>*<term>
+    <uc> := 'U+'<hex unicode value>
+    <seq> := ';'<uc><uc>*
+    <term> := '\n'
+
+Immediately following the glyph header is the bitmap data for the glyph.
+Bitmap data data are <height> lines of <width> ASCII chars representing the
+pixels for the glyph. An empty line will be translated to a row of <width>
+empty pixels. Note that there can be no comments between the glyph header
+and the end of the glyph bitmap data.
+
+See the file Demofont-Fixed8x6.txt for an example of how the textual
+representation of a psf file looks. Note that if you compile this font with
+psfc, the result will only work in a framebuffer console. You can change
+the fonts' width to 8 to make it work in a text mode console.
+
+## The tools ##
+
+### psfd ###
+
+    psfd [file.psf [file.txt]]
+
+converts psf (1 or 2) font files into a textual representation. If the output
+file is omitted, defaults to stdout. If the input file is omitted or `-`,
+defaults to stdin.
+
+This does not call gzip for .psf.gz files, you need to decompress them before
+passing them to psfd.
+
+### psfc ###
+
+    psfc [file.txt [file.psf]]
+
+converts a text file in the format described above into a psf1 or psf2 format
+font file. If the output file is omitted, defaults to stdout. If the input
+file is omitted or `-`, defaults to stdin.
+
+### psfid ###
+
+    psfid [-v] [-w] [-h] [-n] [-u] font.psf
+
+print information about a psf font:
+
+  * -v psf version
+  * -w font width
+  * -h font height
+  * -n number of chars in font
+  * -u presence of unicode translation table in font (1 for yes, 0 for no)
+  * -l list table of encoded chars
+
+default if no options are specified is -v -w -h -n -u
+
+### psft ###
+
+    psft cmd [opts]
+
+perform actions on a psf font text file.
+
+cmd is one of
+
+`ren[umber] [infile [outfile]]`
+:	renumber glyphs. If infile is omitted of -, defaults to stdin.
+	If outfile is omitted, defaults to stdout.
+
+`gen[erate] <version> [-w <width>] [-h <height>] [-n <num>] [-u] [outfile]`
+:	generate a new font template. version is 1 or 2, depending on
+	the psf version you want to generate. width and height default
+	to 8, and num (the amount of chars in the font) defaults to 256.
+	Specify -u to add sample unicode values to the template.
+	If outfile is omitted, defaults to stdout.
+
+`-h|--help|help`
+:	print the help
+
+## The Library ##
+
+There is a small library the utils are based on. It consists of 2 files, psf.c and
+a header file called psf.h. You can just drop those into your project, they have
+no dependencies beyond standard ISO C. The documentation for the functions in the
+library can be found as comments in psf.h.
