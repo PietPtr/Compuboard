@@ -595,11 +595,11 @@ Text Label 11050 2900 0    60   ~ 0
 ROW2
 Text Label 11050 3600 0    60   ~ 0
 ROW3
-Text Label 3200 7350 0    60   ~ 0
+Text Label 3200 6750 0    60   ~ 0
 COL0
-Text Label 3200 7450 0    60   ~ 0
+Text Label 3200 6650 0    60   ~ 0
 COL1
-Text Label 3200 7550 0    60   ~ 0
+Text Label 3200 6550 0    60   ~ 0
 COL2
 Text Label 3200 5650 0    60   ~ 0
 COL3
@@ -1152,11 +1152,11 @@ Text Label 7350 5850 2    60   ~ 0
 MUL1
 Text Label 7350 5950 2    60   ~ 0
 MUL2
-Text Label 3200 6550 0    60   ~ 0
+Text Label 3200 7550 0    60   ~ 0
 MUL0
-Text Label 3200 6650 0    60   ~ 0
+Text Label 3200 7450 0    60   ~ 0
 MUL1
-Text Label 3200 6750 0    60   ~ 0
+Text Label 3200 7350 0    60   ~ 0
 MUL2
 Text Label 7350 4850 2    60   ~ 0
 ROW0
@@ -1202,4 +1202,6 @@ Connection ~ 4900 3600
 Connection ~ 6400 3600
 Connection ~ 7150 3600
 Connection ~ 7900 3600
+Text Label 600  850  0    60   ~ 0
+COL0
 $EndSCHEMATC
